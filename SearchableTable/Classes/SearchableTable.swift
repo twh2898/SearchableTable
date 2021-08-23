@@ -165,14 +165,14 @@ open class SearchableTableViewController: UITableViewController, UISearchBarDele
 
     // MARK: SearchBar Override
 
-    private func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+    public func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         self.searchText = searchText
         reload()
     }
 
-    private func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+    public func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
     }
 
-    private func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+    public func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
     }
 }
