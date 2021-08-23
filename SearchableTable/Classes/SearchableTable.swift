@@ -84,7 +84,7 @@ open class SearchableTableViewController: UITableViewController, UISearchBarDele
     }
 
     /// Reload, sort and filter all table rows with search text as the filter.
-    public func reload() {
+    open func reload() {
         let items = (0..<delegate.numberOfRows()).sorted { a, b in
             delegate.date(for: a) > delegate.date(for: b)
         }
