@@ -13,33 +13,45 @@ extension DateFormatter {
     static let appPrettyFormat = "MMM dd, yyyy h:mm a"
 }
 
+/// Methods for `SearchableTableViewController` to access data.
 public protocol SearchableTableDelegate {
 
+    /// Get the number of rows in the table.
     func numberOfRows() -> Int
 
+    /// Get the name for an item at index `row`.
     func name(for row: Int) -> String
 
+    /// Get the date for an item at index `row`.
     func date(for row: Int) -> Date
 
+    /// Action for adding an item with `name`.
     func searchTable(add name: String)
 
+    /// Action for selecting an item at index `row`. This is typically used to navigate to the item.
     func searchTable(select row: Int)
 
+    /// Action for deleting an item at index `row`.
     func searchTable(delete row: Int)
 
+    /// Action for renaming an item at index `row` to `name`.
     func searchTable(rename row: Int, to name: String)
 }
 
+/// `UITableViewController` with a `UISearchBar` that manages filtering and editing items.
 open class SearchableTableViewController: UITableViewController, UISearchBarDelegate {
 
     private var filterData: [Int] = []
 
     private var searchBar: UISearchBar = UISearchBar()
 
+    /// The search text. Call `SearchableTableViewController.reload() `after changing to show the new search results.
     public var searchText: String = ""
 
+    /// Delegate provides data to the `SearchableTableViewController`.
     public var delegate: SearchableTableDelegate!
 
+    /// Should the table exit edit mode after a rename is complete.
     public var stopEditAfterRename: Bool = false
 
     open override func viewDidLoad() {
@@ -71,6 +83,7 @@ open class SearchableTableViewController: UITableViewController, UISearchBarDele
         reload()
     }
 
+    /// Reload, sort and filter all table rows with search text as the filter.
     public func reload() {
         let items = (0..<delegate.numberOfRows()).sorted { a, b in
             delegate.date(for: a) > delegate.date(for: b)
@@ -95,6 +108,7 @@ open class SearchableTableViewController: UITableViewController, UISearchBarDele
         .delete
     }
 
+    /// Handles the navigation bar add button action.
     @objc private func newItemAction(_ sender: Any) {
         let alertFactory = AlertFactory(title: "Enter a name", message: "Please enter a name", confirmLabel: "Create")
         let alert = alertFactory.prompt(
