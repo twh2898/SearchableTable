@@ -1,0 +1,13 @@
+use_frameworks!
+
+platform :ios, '9.0'
+
+target 'SearchableTable_Example' do
+  pod 'SearchableTable', :path => '../'
+
+  target 'SearchableTable_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
