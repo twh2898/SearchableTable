@@ -4,7 +4,21 @@
 
 To run the example project, clone the repo, and run `pod install` from the Example directory first.
 
+![Screenshot of Example](docs/screenshot.png)
+
+## Features
+
+- Search Bar
+- Edit Button
+- Add Button
+- Deleting
+- Renaming
+- Sorting by date
+- Date Formatting
+
 ## Requirements
+
+- [AlertFactory](https://github.com/twh2898/AlertFactory)
 
 ## Installation
 
