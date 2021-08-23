@@ -1,8 +1,9 @@
 use_frameworks!
 
-platform :ios, '9.0'
+platform :ios, '12.0'
 
 target 'SearchableTable_Example' do
+  pod 'AlertFactory', :git => 'https://github.com/twh2898/AlertFactory'
   pod 'SearchableTable', :path => '../'
 
   target 'SearchableTable_Tests' do
