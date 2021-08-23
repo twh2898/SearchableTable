@@ -13,21 +13,36 @@ extension DateFormatter {
     static let appPrettyFormat = "MMM dd, yyyy h:mm a"
 }
 
-protocol HasDate {
-    var date: Date { get }
+public protocol SearchableTableDelegate {
+
+    func numberOfRows() -> Int
+
+    func name(for row: Int) -> String
+
+    func date(for row: Int) -> Date
+
+    func searchTable(add name: String)
+
+    func searchTable(select row: Int)
+
+    func searchTable(delete row: Int)
+
+    func searchTable(rename row: Int, to name: String)
 }
 
-class SearchableTableViewController<T>: UITableViewController, UISearchBarDelegate where T: Comparable & CustomStringConvertible & HasDate {
+open class SearchableTableViewController: UITableViewController, UISearchBarDelegate {
 
-    var filterData: [T] = []
+    private var filterData: [Int] = []
 
-    var searchText: String = ""
+    private var searchBar: UISearchBar = UISearchBar()
 
-    var searchBar: UISearchBar = UISearchBar()
+    public var searchText: String = ""
 
-    var stopEditAfterRename: Bool = false
+    public var delegate: SearchableTableDelegate!
 
-    override func viewDidLoad() {
+    public var stopEditAfterRename: Bool = false
+
+    open override func viewDidLoad() {
         super.viewDidLoad()
 
         tableView = UITableView(frame: tableView.frame, style: .grouped)
@@ -51,14 +66,14 @@ class SearchableTableViewController<T>: UITableViewController, UISearchBarDelega
         navigationItem.rightBarButtonItems = [editButtonItem, newButtonItem]
     }
 
-    override func viewWillAppear(_ animated: Bool) {
+    open override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         reload()
     }
 
-    func reload() {
-        let items = searchTableItems().sorted { a, b in
-            a > b
+    public func reload() {
+        let items = (0..<delegate.numberOfRows()).sorted { a, b in
+            delegate.date(for: a) > delegate.date(for: b)
         }
 
         if searchText.isEmpty {
@@ -74,35 +89,13 @@ class SearchableTableViewController<T>: UITableViewController, UISearchBarDelega
         tableView.reloadData()
     }
 
-    // MARK: Public Override
-
-    func searchTableItems() -> [T] {
-        []
-    }
-
-    func searchTable(add name: String) {
-
-    }
-
-    func searchTable(select item: T) {
-
-    }
-
-    func searchTable(delete item: T) {
-
-    }
-
-    func searchTable(rename item: T, to name: String) {
-
-    }
-
     // MARK: Table Override
 
-    override func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
+    public override func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
         .delete
     }
 
-    @objc func newItemAction(_ sender: Any) {
+    @objc private func newItemAction(_ sender: Any) {
         let alertFactory = AlertFactory(title: "Enter a name", message: "Please enter a name", confirmLabel: "Create")
         let alert = alertFactory.prompt(
             confirmAction: { name in
@@ -111,31 +104,35 @@ class SearchableTableViewController<T>: UITableViewController, UISearchBarDelega
                     return
                 }
 
-                self.searchTable(add: name)
+                self.delegate.searchTable(add: name)
+                self.reload()
             })
 
         present(alert, animated: true, completion: nil)
     }
 
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    public override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         filterData.count
     }
 
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    public override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
         cell.accessoryType = .disclosureIndicator
         let item = filterData[indexPath.row]
-        cell.textLabel?.text = item.description
+        cell.textLabel?.text = delegate.name(for: item)
         let dateFormatterPrint = DateFormatter()
         dateFormatterPrint.dateFormat = DateFormatter.appPrettyFormat
-        cell.detailTextLabel?.text = dateFormatterPrint.string(from: item.date)
+        cell.detailTextLabel?.text = dateFormatterPrint.string(from: delegate.date(for: item))
         return cell
     }
 
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    public override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if tableView.isEditing {
             self.prompt(
-                title: "Enter a name", message: "Please enter a new name", placeholder: "Name",
+                title: "Enter a name",
+                message: "Please enter a new name",
+                placeholder: "Name",
+                defaultValue: delegate.name(for: filterData[indexPath.row]),
                 confirmAction: { name in
                     guard let name = name else {
                         self.alert(title: "Error", message: "An error occurred while trying to handle the name.")
@@ -147,7 +144,7 @@ class SearchableTableViewController<T>: UITableViewController, UISearchBarDelega
                         return
                     }
 
-                    self.searchTable(rename: self.filterData[indexPath.row], to: name)
+                    self.delegate.searchTable(rename: self.filterData[indexPath.row], to: name)
                     self.reload()
 
                     if self.stopEditAfterRename {
@@ -155,27 +152,27 @@ class SearchableTableViewController<T>: UITableViewController, UISearchBarDelega
                     }
                 })
         } else {
-            searchTable(select: filterData[indexPath.row])
+            delegate.searchTable(select: filterData[indexPath.row])
         }
     }
 
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+    public override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            searchTable(delete: filterData[indexPath.row])
+            delegate.searchTable(delete: filterData[indexPath.row])
             reload()
         }
     }
 
     // MARK: SearchBar Override
 
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+    private func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         self.searchText = searchText
         reload()
     }
 
-    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+    private func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
     }
 
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+    private func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
     }
 }

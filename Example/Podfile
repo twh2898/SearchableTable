@@ -3,7 +3,7 @@ use_frameworks!
 platform :ios, '13.0'
 
 target 'SearchableTable_Example' do
-  pod 'AlertFactory', :git => 'https://github.com/twh2898/AlertFactory'
+  pod 'AlertFactory', :git => 'https://github.com/twh2898/AlertFactory', :tag => 'v0.2.3'
   pod 'SearchableTable', :path => '../'
 
   target 'SearchableTable_Tests' do
