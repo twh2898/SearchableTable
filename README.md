@@ -18,6 +18,7 @@ To run the example project, clone the repo, and run `pod install` from the Examp
 
 ## Requirements
 
+- iOS 13.0
 - [AlertFactory](https://github.com/twh2898/AlertFactory)
 
 ## Installation
