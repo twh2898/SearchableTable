@@ -101,15 +101,9 @@ open class SearchableTableViewController: UITableViewController, UISearchBarDele
 
         tableView.reloadData()
     }
-
-    // MARK: Table Override
-
-    public override func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
-        .delete
-    }
-
+    
     /// Handles the navigation bar add button action.
-    @objc private func newItemAction(_ sender: Any) {
+    @objc open func newItemAction(_ sender: Any) {
         let alertFactory = AlertFactory(title: "Enter a name", message: "Please enter a name", confirmLabel: "Create")
         let alert = alertFactory.prompt(
             confirmAction: { name in
@@ -117,12 +111,18 @@ open class SearchableTableViewController: UITableViewController, UISearchBarDele
                     self.alert(title: "Empty Name", message: "The name was empty")
                     return
                 }
-
+                
                 self.delegate.searchTable(add: name)
                 self.reload()
             })
-
+        
         present(alert, animated: true, completion: nil)
+    }
+
+    // MARK: Table Override
+
+    public override func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
+        .delete
     }
 
     public override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
