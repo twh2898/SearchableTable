@@ -119,12 +119,12 @@ open class SearchableTableViewController: UITableViewController, UISearchBarDele
         present(alert, animated: true, completion: nil)
     }
 
-    open func editItemAction(forRowAt indexPath: IndexPath) {
+    open func editItemAction(for row: Int) {
         self.prompt(
             title: "Enter a name",
             message: "Please enter a new name",
             placeholder: "Name",
-            defaultValue: delegate.name(for: filterData[indexPath.row]),
+            defaultValue: delegate.name(for: row),
             confirmAction: { name in
                 guard let name = name else {
                     self.alert(title: "Error", message: "An error occurred while trying to handle the name.")
@@ -136,7 +136,7 @@ open class SearchableTableViewController: UITableViewController, UISearchBarDele
                     return
                 }
 
-                self.delegate.searchTable(rename: self.filterData[indexPath.row], to: name)
+                self.delegate.searchTable(rename: row, to: name)
                 self.reload()
 
                 if self.stopEditAfterRename {
@@ -168,7 +168,7 @@ open class SearchableTableViewController: UITableViewController, UISearchBarDele
 
     public override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if tableView.isEditing {
-            editItemAction(forRowAt: indexPath)
+            editItemAction(for: filterData[indexPath.row])
         } else {
             delegate.searchTable(select: filterData[indexPath.row])
         }
