@@ -101,7 +101,7 @@ open class SearchableTableViewController: UITableViewController, UISearchBarDele
 
         tableView.reloadData()
     }
-    
+
     /// Handles the navigation bar add button action.
     @objc open func newItemAction(_ sender: Any) {
         let alertFactory = AlertFactory(title: "Enter a name", message: "Please enter a name", confirmLabel: "Create")
@@ -111,12 +111,38 @@ open class SearchableTableViewController: UITableViewController, UISearchBarDele
                     self.alert(title: "Empty Name", message: "The name was empty")
                     return
                 }
-                
+
                 self.delegate.searchTable(add: name)
                 self.reload()
             })
-        
+
         present(alert, animated: true, completion: nil)
+    }
+
+    open func editItemAction(forRowAt indexPath: IndexPath) {
+        self.prompt(
+            title: "Enter a name",
+            message: "Please enter a new name",
+            placeholder: "Name",
+            defaultValue: delegate.name(for: filterData[indexPath.row]),
+            confirmAction: { name in
+                guard let name = name else {
+                    self.alert(title: "Error", message: "An error occurred while trying to handle the name.")
+                    return
+                }
+
+                guard !name.isEmpty else {
+                    self.alert(title: "Empty Name", message: "The name must not be empty")
+                    return
+                }
+
+                self.delegate.searchTable(rename: self.filterData[indexPath.row], to: name)
+                self.reload()
+
+                if self.stopEditAfterRename {
+                    self.tableView.isEditing = false
+                }
+            })
     }
 
     // MARK: Table Override
@@ -142,29 +168,7 @@ open class SearchableTableViewController: UITableViewController, UISearchBarDele
 
     public override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if tableView.isEditing {
-            self.prompt(
-                title: "Enter a name",
-                message: "Please enter a new name",
-                placeholder: "Name",
-                defaultValue: delegate.name(for: filterData[indexPath.row]),
-                confirmAction: { name in
-                    guard let name = name else {
-                        self.alert(title: "Error", message: "An error occurred while trying to handle the name.")
-                        return
-                    }
-
-                    guard !name.isEmpty else {
-                        self.alert(title: "Empty Name", message: "The name must not be empty")
-                        return
-                    }
-
-                    self.delegate.searchTable(rename: self.filterData[indexPath.row], to: name)
-                    self.reload()
-
-                    if self.stopEditAfterRename {
-                        self.tableView.isEditing = false
-                    }
-                })
+            editItemAction(forRowAt: indexPath)
         } else {
             delegate.searchTable(select: filterData[indexPath.row])
         }
